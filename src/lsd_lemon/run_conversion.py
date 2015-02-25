@@ -81,23 +81,19 @@ for subject in subjects:
     if not lemon == 'nan':
         create_conversion(name='lemon_conversion', subject=subject_id, scans=lemon_scans,
                        working_dir=working_dir, out_dir=nifti_dir, folder=lemon_folder,
-                       xnat_server=xnat_server, xnat_user=xnat_user, xnat_pass=xnat_pass, 
-                       project_id=lemon_project_id, exp_id=lemon)
-        
+                       data_dir=data_dir, experiment='lemon')
+                
     if not lsd == 'nan':
         create_conversion(name='lsd_conversion', subject=subject_id, scans=lsd_scans,
                        working_dir=working_dir, out_dir=nifti_dir, folder=lsd_folder,
-                       xnat_server=xnat_server, xnat_user=xnat_user, xnat_pass=xnat_pass, 
-                       project_id=lsd_project_id, exp_id=lsd)
+                       data_dir=data_dir, experiment='lsd')
         
     if mp2rage =='lemon':
         create_conversion(name='mp2rage_conversion', subject=subject_id, scans=mp2rage_scans,
                        working_dir=working_dir, out_dir=nifti_dir, folder=mp2rage_folder,
-                       xnat_server=xnat_server, xnat_user=xnat_user, xnat_pass=xnat_pass, 
-                       project_id=lemon_project_id, exp_id=lemon)
+                       data_dir=data_dir, experiment='lemon')
         
     elif mp2rage == 'lsd':
         create_conversion(name='mp2rage_conversion', subject=subject_id, scans=mp2rage_scans,
                        working_dir=working_dir, out_dir=nifti_dir, folder=mp2rage_folder,
-                       xnat_server=xnat_server, xnat_user=xnat_user, xnat_pass=xnat_pass, 
-                       project_id=lsd_project_id, exp_id=lsd)
+                       data_dir=data_dir, experiment='lsd')
