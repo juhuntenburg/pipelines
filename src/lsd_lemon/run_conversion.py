@@ -13,12 +13,14 @@ Will ask for xnat credentials
 
 list_conversion=sys.argv[1]
 
-xnat_user = raw_input('XNAT username: ')
-xnat_pass = getpass.getpass('XNAT password: ')
-xnat_server = 'https://xnat.cbs.mpg.de/xnat' 
+#xnat_user = raw_input('XNAT username: ')
+#xnat_pass = getpass.getpass('XNAT password: ')
+#xnat_server = 'https://xnat.cbs.mpg.de/xnat' 
 
-lemon_project_id = 'LEMON'
-lsd_project_id = 'LEMON_LSD'
+#lemon_project_id = 'LEMON'
+#lsd_project_id = 'LEMON_LSD'
+
+data_dir = '/scr/ilz2/LEMON_LSD/dicoms/'
 
 df=pd.read_excel(list_conversion, 'Sheet1')
 subjects=list(df['subject_id'])
