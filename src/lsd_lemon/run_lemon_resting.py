@@ -21,10 +21,10 @@ for subject in subjects:
     
     print 'Running subject '+subject
 
-    working_dir = '/scr/ilz2/LEMON_LSD/working_dir_lemon/'+subject+'/' 
-    data_dir = '/scr/ilz2/LEMON_LSD/'+subject+'/'             
-    freesurfer_dir = '/scr/ilz2/LEMON_LSD/freesurfer/'
-    lemon_dir = '/scr/ilz2/LEMON_LSD/'+subject+'/preprocessed/lemon_resting/'
+    working_dir = '/scr/ilz2/LEMON_LSD/working_dir_4sven/'+subject+'/' 
+    data_dir = '/afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/'+subject+'/'             
+    freesurfer_dir = '/afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/freesurfer/'
+    lemon_dir = '/scr/ilz2/LEMON_LSD/data4sven/'+subject+'/'
     echo_space=0.00067 #in sec
     te_diff=2.46 #in ms
     epi_resolution = 2.3

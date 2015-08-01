@@ -29,11 +29,20 @@ def create_lemon_resting(subject, working_dir, data_dir, freesurfer_dir, out_dir
     
     # select files
     templates={'func': 'nifti/lemon_resting/rest.nii.gz',
-               'fmap_phase' : 'nifti/lemon_resting/fmap_phase.nii.gz',
-               'fmap_mag' : 'nifti/lemon_resting/fmap_mag.nii.gz',
+#                'fmap_phase' : 'nifti/lemon_resting/fmap_phase.nii.gz',
+#                'fmap_mag' : 'nifti/lemon_resting/fmap_mag.nii.gz',
+               'mat_moco' : 'preprocessed/lemon_resting/realign/MAT/*',
+               'fmap_fullwarp' : 'preprocessed/lemon_resting/coregister/transforms2anat/fullwarpfield.nii.gz',
+               'par_moco' : 'preprocessed/lemon_resting/realign/rest_realigned.par',
+               'epi2anat_dat' : 'preprocessed/lemon_resting/coregister/transforms2anat/rest2anat.dat',
+               'uwarped_mean_epi2fmap' : 'preprocessed/lemon_resting/coregister/rest_mean2fmap_unwarped.nii.gz',
                'anat_head' : 'preprocessed/anat/T1.nii.gz',
                'anat_brain' : 'preprocessed/anat/T1_brain.nii.gz',
-               'brain_mask' : 'preprocessed/anat/T1_brain_mask.nii.gz'
+               'resamp_brain' : 'preprocessed/lemon_resting/coregister/T1_resampled.nii.gz',
+               #'brain_mask' : 'preprocessed/anat/T1_brain_mask.nii.gz',
+               'mc_regressor' : 'preprocessed/lemon_resting/denoise/regress/mcart_regressor.txt',
+               'comp_regressor' : 'preprocessed/lemon_resting/denoise/regress/noise_regressor.txt',
+               'brain_mask_resamp' : 'preprocessed/lemon_resting/denoise/mask/T1_brain_mask_lowres.nii.gz'
                }
     selectfiles = Node(nio.SelectFiles(templates,
                                        base_directory=data_dir),
@@ -47,15 +56,15 @@ def create_lemon_resting(subject, working_dir, data_dir, freesurfer_dir, out_dir
     remove_vol.inputs.t_min = vol_to_remove
     
     # workflow for motion correction
-    moco=create_moco_pipeline()
+#    moco=create_moco_pipeline()
     
     # workflow for fieldmap correction and coregistration
-    fmap_coreg=create_fmap_coreg_pipeline()
-    fmap_coreg.inputs.inputnode.fs_subjects_dir=freesurfer_dir
-    fmap_coreg.inputs.inputnode.fs_subject_id=subject
-    fmap_coreg.inputs.inputnode.echo_space=echo_space
-    fmap_coreg.inputs.inputnode.te_diff=te_diff
-    fmap_coreg.inputs.inputnode.pe_dir=pe_dir
+#     fmap_coreg=create_fmap_coreg_pipeline()
+#     fmap_coreg.inputs.inputnode.fs_subjects_dir=freesurfer_dir
+#     fmap_coreg.inputs.inputnode.fs_subject_id=subject
+#     fmap_coreg.inputs.inputnode.echo_space=echo_space
+#     fmap_coreg.inputs.inputnode.te_diff=te_diff
+#     fmap_coreg.inputs.inputnode.pe_dir=pe_dir
     
     # workflow for applying transformations to timeseries
     transform_ts = create_transform_pipeline()
@@ -90,52 +99,62 @@ def create_lemon_resting(subject, working_dir, data_dir, freesurfer_dir, out_dir
     
     # connections
     func_preproc.connect([(selectfiles, remove_vol, [('func', 'in_file')]),
-                          (remove_vol, moco, [('out_file', 'inputnode.epi')]),
-                          (selectfiles, fmap_coreg, [('fmap_phase', 'inputnode.phase'),
-                                                     ('fmap_mag', 'inputnode.mag'),
-                                                     ('anat_head', 'inputnode.anat_head'),
-                                                     ('anat_brain', 'inputnode.anat_brain')
-                                                     ]),
-                          (moco, fmap_coreg, [('outputnode.epi_mean', 'inputnode.epi_mean')]),
+#                          (remove_vol, moco, [('out_file', 'inputnode.epi')]),
+#                           (selectfiles, fmap_coreg, [('fmap_phase', 'inputnode.phase'),
+#                                                      ('fmap_mag', 'inputnode.mag'),
+#                                                      ('anat_head', 'inputnode.anat_head'),
+#                                                      ('anat_brain', 'inputnode.anat_brain')
+#                                                      ]),
+#                          (moco, fmap_coreg, [('outputnode.epi_mean', 'inputnode.epi_mean')]),
                           (remove_vol, transform_ts, [('out_file', 'inputnode.orig_ts')]),
                           (selectfiles, transform_ts, [('anat_head', 'inputnode.anat_head')]),
-                          (moco, transform_ts, [('outputnode.mat_moco', 'inputnode.mat_moco')]),
-                          (fmap_coreg, transform_ts, [('outputnode.fmap_fullwarp', 'inputnode.fullwarp')]),
-                          (selectfiles, denoise, [('brain_mask', 'inputnode.brain_mask'),
-                                                  ('anat_brain', 'inputnode.anat_brain')]),
-                          (moco, denoise, [('outputnode.par_moco', 'inputnode.moco_par')]),
-                          (fmap_coreg, denoise, [('outputnode.epi2anat_dat', 'inputnode.epi2anat_dat'),
-                                                 ('outputnode.unwarped_mean_epi2fmap', 'inputnode.unwarped_mean')]),
+#                          (moco, transform_ts, [('outputnode.mat_moco', 'inputnode.mat_moco')]),
+                          (selectfiles, transform_ts, [('mat_moco', 'inputnode.mat_moco'),
+                                                       ('fmap_fullwarp', 'inputnode.fullwarp'),
+                                                       ('resamp_brain', 'inputnode.resamp_brain')]),
+#                          (fmap_coreg, transform_ts, [('outputnode.fmap_fullwarp', 'inputnode.fullwarp')]),
+                          (selectfiles, denoise, [#('brain_mask', 'inputnode.brain_mask'),
+                                                  #('anat_brain', 'inputnode.anat_brain'),
+                                                  #('par_moco', 'inputnode.moco_par'),
+                                                  #('epi2anat_dat', 'inputnode.epi2anat_dat'),
+                                                  #('uwarped_mean_epi2fmap', 'inputnode.unwarped_mean')
+                                                  ('mc_regressor', 'inputnode.mc_regressor'),
+                                                  ('comp_regressor', 'inputnode.comp_regressor'),
+                                                  ('brain_mask_resamp', 'inputnode.brain_mask_resamp')]),
+#                          (moco, denoise, [('outputnode.par_moco', 'inputnode.moco_par')]),
+#                          (fmap_coreg, denoise, [('outputnode.epi2anat_dat', 'inputnode.epi2anat_dat'),
+#                                                  ('outputnode.unwarped_mean_epi2fmap', 'inputnode.unwarped_mean')]),
                           (transform_ts, denoise, [('outputnode.trans_ts','inputnode.epi_coreg')]),
-                          (moco, sink, [#('outputnode.epi_moco', 'realign.@realigned_ts'),
-                                        ('outputnode.par_moco', 'realign.@par'),
-                                        ('outputnode.rms_moco', 'realign.@rms'),
-                                        ('outputnode.mat_moco', 'realign.MAT.@mat'),
-                                        ('outputnode.epi_mean', 'realign.@mean'),
-                                        ('outputnode.rotplot', 'realign.plots.@rotplot'),
-                                        ('outputnode.transplot', 'realign.plots.@transplot'),
-                                        ('outputnode.dispplots', 'realign.plots.@dispplots'),
-                                        ('outputnode.tsnr_file', 'realign.@tsnr')]),
-                          (fmap_coreg, sink, [('outputnode.fmap','coregister.transforms2anat.@fmap'),
-                                              #('outputnode.unwarpfield_epi2fmap', 'coregister.@unwarpfield_epi2fmap'),
-                                              ('outputnode.unwarped_mean_epi2fmap', 'coregister.@unwarped_mean_epi2fmap'),
-                                              ('outputnode.epi2fmap', 'coregister.@epi2fmap'),
-                                              #('outputnode.shiftmap', 'coregister.@shiftmap'),
-                                              ('outputnode.fmap_fullwarp', 'coregister.transforms2anat.@fmap_fullwarp'),
-                                              ('outputnode.epi2anat', 'coregister.@epi2anat'),
-                                              ('outputnode.epi2anat_mat', 'coregister.transforms2anat.@epi2anat_mat'),
-                                              ('outputnode.epi2anat_dat', 'coregister.transforms2anat.@epi2anat_dat'),
-                                              ('outputnode.epi2anat_mincost', 'coregister.@epi2anat_mincost')
-                                              ]),
+#                           (moco, sink, [#('outputnode.epi_moco', 'realign.@realigned_ts'),
+#                                         ('outputnode.par_moco', 'realign.@par'),
+#                                         ('outputnode.rms_moco', 'realign.@rms'),
+#                                         ('outputnode.mat_moco', 'realign.MAT.@mat'),
+#                                         ('outputnode.epi_mean', 'realign.@mean'),
+#                                         ('outputnode.rotplot', 'realign.plots.@rotplot'),
+#                                         ('outputnode.transplot', 'realign.plots.@transplot'),
+#                                         ('outputnode.dispplots', 'realign.plots.@dispplots'),
+#                                         ('outputnode.tsnr_file', 'realign.@tsnr')]),
+#                           (fmap_coreg, sink, [('outputnode.fmap','coregister.transforms2anat.@fmap'),
+#                                               #('outputnode.unwarpfield_epi2fmap', 'coregister.@unwarpfield_epi2fmap'),
+#                                               ('outputnode.unwarped_mean_epi2fmap', 'coregister.@unwarped_mean_epi2fmap'),
+#                                               ('outputnode.epi2fmap', 'coregister.@epi2fmap'),
+#                                               #('outputnode.shiftmap', 'coregister.@shiftmap'),
+#                                               ('outputnode.fmap_fullwarp', 'coregister.transforms2anat.@fmap_fullwarp'),
+#                                               ('outputnode.epi2anat', 'coregister.@epi2anat'),
+#                                               ('outputnode.epi2anat_mat', 'coregister.transforms2anat.@epi2anat_mat'),
+#                                               ('outputnode.epi2anat_dat', 'coregister.transforms2anat.@epi2anat_dat'),
+#                                               ('outputnode.epi2anat_mincost', 'coregister.@epi2anat_mincost')
+#                                               ]),
                           (transform_ts, sink, [#('outputnode.trans_ts', 'coregister.@full_transform_ts'),
                                                 ('outputnode.trans_ts_mean', 'coregister.@full_transform_mean'),
-                                                ('outputnode.resamp_brain', 'coregister.@resamp_brain')]),
-                          (denoise, sink, [('outputnode.wmcsf_mask', 'denoise.mask.@wmcsf_masks'),
-                                           ('outputnode.combined_motion','denoise.artefact.@combined_motion'),
-                                           ('outputnode.outlier_files','denoise.artefact.@outlier'),
-                                           ('outputnode.intensity_files','denoise.artefact.@intensity'),
-                                           ('outputnode.outlier_stats','denoise.artefact.@outlierstats'),
-                                           ('outputnode.outlier_plots','denoise.artefact.@outlierplots'),
+                                                #('outputnode.resamp_brain', 'coregister.@resamp_brain')
+                                                ]),
+                          (denoise, sink, [#('outputnode.wmcsf_mask', 'denoise.mask.@wmcsf_masks'),
+                                           #('outputnode.combined_motion','denoise.artefact.@combined_motion'),
+                                           #('outputnode.outlier_files','denoise.artefact.@outlier'),
+                                           #('outputnode.intensity_files','denoise.artefact.@intensity'),
+                                           #('outputnode.outlier_stats','denoise.artefact.@outlierstats'),
+                                           #('outputnode.outlier_plots','denoise.artefact.@outlierplots'),
                                            ('outputnode.mc_regressor', 'denoise.regress.@mc_regressor'),
                                            ('outputnode.comp_regressor', 'denoise.regress.@comp_regressor'),
                                            ('outputnode.mc_F', 'denoise.regress.@mc_F'),
@@ -143,12 +162,14 @@ def create_lemon_resting(subject, working_dir, data_dir, freesurfer_dir, out_dir
                                            ('outputnode.comp_F', 'denoise.regress.@comp_F'),
                                            ('outputnode.comp_pF', 'denoise.regress.@comp_pF'),
                                            ('outputnode.brain_mask_resamp', 'denoise.mask.@brain_resamp'),
-                                           ('outputnode.brain_mask2epi', 'denoise.mask.@brain_mask2epi'),
-                                           ('outputnode.normalized_file', '@normalized')
-                                           ])
+                                           #('outputnode.brain_mask2epi', 'denoise.mask.@brain_mask2epi'),
+                                           #('outputnode.normalized_file', '@normalized')
+                                           ('outputnode.bandpassed_file', '@bandpassed')
+                                           ]),
+                          (selectfiles, sink, [('anat_brain', 'anat.@brain')])
                           ])
     
-    #func_preproc.write_graph(dotfilename='func_preproc.dot', graph2use='colored', format='pdf', simple_form=True)
+    #func_preproc.write_graph(dotfilename='func_preproc.dot', graph2use='colored', format='png', simple_form=True)
     func_preproc.run()
-    #func_preproc.run(plugin='MultiProc')
+    #func_preproc.run(plugin='MultiProc', plugin_args={'n_procs' : 12})
     #func_preproc.run(plugin='CondorDAGMan')

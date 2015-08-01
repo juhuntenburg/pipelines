@@ -18,11 +18,11 @@ with open(subject_list, 'r') as f:
 
 
 # local base and output directory
-data_dir = '/scr/ilz2/LEMON_LSD/'
-base_dir = '/scr/ilz2/LEMON_LSD/working_dir_lemon_mni/'
-out_dir = '/scr/ilz2/LEMON_LSD/%s/preprocessed/lemon_resting/'
+data_dir = '/'
+base_dir = '/scr/ilz2/LEMON_LSD/working_dir_4sven/'
+out_dir = '/scr/ilz2/LEMON_LSD/data4sven/%s/'
 
-template ='/usr/share/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz'
+template ='/scr/ilz2/LEMON_LSD/data4sven/MNI152_T1_3mm_brain.nii.gz'
 
 # workflow
 mni = Workflow(name='mni')
@@ -35,9 +35,9 @@ subject_infosource=Node(util.IdentityInterface(fields=['subject_id']),
 subject_infosource.iterables=('subject_id', subjects)
 
 # select files
-templates={'rest': '{subject_id}/preprocessed/lemon_resting/rest_preprocessed.nii.gz',
-           'affine': '{subject_id}/preprocessed/anat/transforms2mni/transform0GenericAffine.mat',
-           'warp': '{subject_id}/preprocessed/anat/transforms2mni/transform1Warp.nii.gz',
+templates={'rest': 'scr/ilz2/LEMON_LSD/data4sven/{subject_id}/denoise/rest_denoised_bandpassed.nii.gz',
+           'affine': 'afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/{subject_id}/preprocessed/anat/transforms2mni/transform0GenericAffine.mat',
+           'warp': 'afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/{subject_id}/preprocessed/anat/transforms2mni/transform1Warp.nii.gz',
            }
 selectfiles = Node(nio.SelectFiles(templates,
                                    base_directory=data_dir),
@@ -86,4 +86,4 @@ mni.connect([(subject_infosource, sink, [(('subject_id', makebase, out_dir), 'ba
              (changedt, sink, [('out_file', '@rest2mni')])
              ])
 
-mni.run()
+mni.run(plugin='MultiProc', plugin_args={'n_procs' : 12})

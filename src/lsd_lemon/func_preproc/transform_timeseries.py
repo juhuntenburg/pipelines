@@ -20,7 +20,8 @@ def create_transform_pipeline(name='transfrom_timeseries'):
                                                   'anat_head',
                                                   'mat_moco',
                                                   'fullwarp',
-                                                  'resolution']),
+                                                  'resolution', 
+                                                  'resamp_brain']),
                    name='inputnode')
     
     # outputnode                                     
@@ -30,15 +31,15 @@ def create_transform_pipeline(name='transfrom_timeseries'):
                     name='outputnode')
     
     #resample anatomy
-    resample = Node(fsl.FLIRT(datatype='float',
-                              out_file='T1_resampled.nii.gz'),
-                       name = 'resample_anat')
-    transform_ts.connect([(inputnode, resample, [('anat_head', 'in_file'),
-                                                 ('anat_head', 'reference'),
-                                                 ('resolution', 'apply_isoxfm')
-                                                    ]),
-                          (resample, outputnode, [('out_file', 'resamp_brain')])
-                          ])
+#     resample = Node(fsl.FLIRT(datatype='float',
+#                               out_file='T1_resampled.nii.gz'),
+#                        name = 'resample_anat')
+#     transform_ts.connect([(inputnode, resample, [('anat_head', 'in_file'),
+#                                                  ('anat_head', 'reference'),
+#                                                  ('resolution', 'apply_isoxfm')
+#                                                     ]),
+#                           (resample, outputnode, [('out_file', 'resamp_brain')])
+#                           ])
     
     # split timeseries in single volumes
     split=Node(fsl.Split(dimension='t',
@@ -59,8 +60,9 @@ def create_transform_pipeline(name='transfrom_timeseries'):
        
     transform_ts.connect([(split, applywarp, [('out_files', 'in_file')]),
                           (inputnode, applywarp, [('mat_moco', 'premat'),
-                                                  ('fullwarp','field_file')]),
-                          (resample, applywarp, [('out_file', 'ref_file')])
+                                                  ('fullwarp','field_file'), 
+                                                  ('resamp_brain', 'ref_file')]),
+                          #(resample, applywarp, [('out_file', 'ref_file')])
                           ])
        
     # re-concatenate volumes
