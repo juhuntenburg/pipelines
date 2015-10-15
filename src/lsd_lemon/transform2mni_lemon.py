@@ -20,9 +20,9 @@ with open(subject_list, 'r') as f:
 # local base and output directory
 data_dir = '/'
 base_dir = '/scr/ilz2/LEMON_LSD/working_dir_4sven/'
-out_dir = '/scr/ilz2/LEMON_LSD/data4sven/%s/'
+out_dir = '/scr/ilz2/LEMON_LSD/data4sven/mni3mm/'
 
-template ='/scr/ilz2/LEMON_LSD/data4sven/MNI152_T1_3mm_brain.nii.gz'
+template ='/scr/ilz2/LEMON_LSD/data4sven/mni3mm/MNI152_T1_3mm_brain.nii.gz'
 
 # workflow
 mni = Workflow(name='mni')
@@ -65,25 +65,27 @@ mni.connect([(selectfiles, applytransform, [('rest', 'input_image')]),
              (translist, applytransform, [('out', 'transforms')])
              ])
 
+# make filename
+def makename(subject_id):
+    return '%s_rest_preprocessed2mni.nii.gz'%(subject_id)
+
 # tune down image to float
-changedt = Node(fsl.ChangeDataType(output_datatype='float',
-                                   out_file='rest_preprocessed2mni.nii.gz'),
+changedt = Node(fsl.ChangeDataType(output_datatype='float'),
                 name='changedt')
 changedt.plugin_args={'submit_specs': 'request_memory = 30000'}
-mni.connect([(applytransform, changedt, [('output_image', 'in_file')])])
+mni.connect([(applytransform, changedt, [('output_image', 'in_file')]),
+             (subject_infosource, changedt, [(('subject_id', makename), 'out_file')])
+            ])
 
 
-# make base directory
-def makebase(subject_id, out_dir):
-    return out_dir%subject_id
+
 
 # sink
 sink = Node(nio.DataSink(base_directory=out_dir,
                          parameterization=False),
                 name='sink')
 
-mni.connect([(subject_infosource, sink, [(('subject_id', makebase, out_dir), 'base_directory')]),
-             (changedt, sink, [('out_file', '@rest2mni')])
+mni.connect([(changedt, sink, [('out_file', '@rest2mni')])
              ])
 
-mni.run(plugin='MultiProc', plugin_args={'n_procs' : 12})
+mni.run(plugin='MultiProc', plugin_args={'n_procs' : 25})
