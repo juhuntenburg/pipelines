@@ -6,12 +6,14 @@ import nipype.interfaces.io as nio
 import sys
 
 
+
+#NOT 25189, 25192, 24918
 '''
 Project preprocessed lemon resting state from 
 individual structural to MNI152 2mm space
 '''
 
-subject_list= sys.argv[1]
+subject_list= '/scr/ilz2/LEMON_LSD/data4sven/subjects4sven.txt'
 
 with open(subject_list, 'r') as f:
     subjects = [line.strip() for line in f]
@@ -35,7 +37,7 @@ subject_infosource=Node(util.IdentityInterface(fields=['subject_id']),
 subject_infosource.iterables=('subject_id', subjects)
 
 # select files
-templates={'rest': 'scr/ilz2/LEMON_LSD/data4sven/{subject_id}/denoise/rest_denoised_bandpassed.nii.gz',
+templates={'rest': 'scr/ilz2/LEMON_LSD/data4sven/{subject_id}/rest_denoised_bandpassed.nii.gz',
            'affine': 'afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/{subject_id}/preprocessed/anat/transforms2mni/transform0GenericAffine.mat',
            'warp': 'afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/{subject_id}/preprocessed/anat/transforms2mni/transform1Warp.nii.gz',
            }
@@ -88,4 +90,4 @@ sink = Node(nio.DataSink(base_directory=out_dir,
 mni.connect([(changedt, sink, [('out_file', '@rest2mni')])
              ])
 
-mni.run(plugin='MultiProc', plugin_args={'n_procs' : 25})
+mni.run(plugin='MultiProc', plugin_args={'n_procs' : 10})
