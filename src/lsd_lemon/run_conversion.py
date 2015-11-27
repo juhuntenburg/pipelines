@@ -11,7 +11,7 @@ experiment labels and scan IDs in xnat.
 Will ask for xnat credentials
 '''
 
-list_conversion=sys.argv[1]
+list_conversion='/scr/ilz2/LEMON_LSD/juliatest/conv.xls' #sys.argv[1]
 
 xnat_user = raw_input('XNAT username: ')
 xnat_pass = getpass.getpass('XNAT password: ')
@@ -74,8 +74,8 @@ for subject in subjects:
     lsd_scans['rest2b'] = df[df['subject_id']==subject].iloc[0]['lsd_rest2b']
 
     # set directories 
-    working_dir = '/scr/ilz2/LEMON_LSD/working_dir_conversion/'+subject_id+'/' 
-    nifti_dir = '/scr/ilz2/LEMON_LSD/'+subject_id+'/nifti/'
+    working_dir = '/scr/ilz2/LEMON_LSD/juliatest/'+subject_id+'/' 
+    nifti_dir = '/scr/ilz2/LEMON_LSD/juliatest/'+subject_id+'/nifti/'
 
     # run conversion
     if not lemon == 'nan':
