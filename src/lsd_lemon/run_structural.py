@@ -22,10 +22,10 @@ for subject in subjects:
     
     print 'Running subject '+subject
     
-    working_dir = '/scr/ilz2/LEMON_LSD/working_dir_struct/' +subject+'/' 
-    data_dir = '/scr/ilz2/LEMON_LSD/'+subject+'/'
-    out_dir = '/scr/ilz2/LEMON_LSD/'+subject+'/'
-    freesurfer_dir = '/scr/ilz2/LEMON_LSD/freesurfer/' 
+    working_dir = '/nobackup/ilz2/LEMON_LSD/rescue_julia/working_dir/' +subject+'/' 
+    data_dir = '/nobackup/ilz2/LEMON_LSD/rescue_julia/'+subject+'/'
+    out_dir = '/nobackup/ilz2/LEMON_LSD/rescue_julia/'+subject+'/'
+    freesurfer_dir = '/nobackup/ilz2/LEMON_LSD/rescue_julia/freesurfer/' 
     standard_brain = '/usr/share/fsl/5.0/data/standard/MNI152_T1_1mm_brain.nii.gz'
     
     create_structural(subject=subject, working_dir=working_dir, data_dir=data_dir, 
