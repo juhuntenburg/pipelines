@@ -7,17 +7,18 @@ source_func = '/afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/%s/pre
 source_noise = '/afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/%s/preprocessed/lsd_resting/%s/denoise/regress/noise_regressor.txt'
 source_mask = '/afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/probands/%s/preprocessed/anat/'
 source_qc = '/afs/cbs.mpg.de/projects/mar004_lsd-lemon-preproc/results/reports/lsd_new/%s_%s_report.pdf'
-mp2rage_sess = '/nobackup/adenauer2/marcel/LSD/MPI_Leipzig_MindBodyBrain/%s/ses-%s/anat/sub-%s_ses-%s_acq-mp2rage_defacemask.nii.gz'
-dest = '/data/pt_gr_margulies-internal1/derivatives/'
+mp2rage_sess = '/nobackup/adenauer2/marcel/LSD/MPI_Leipzig_MindBodyBrain/sub-%s/ses-%s/anat/sub-%s_ses-%s_acq-mp2rage_defacemask.nii.gz'
+dest = '/data/pt_gr_margulies-internal1/derivatives/sub-%s'
 
-rest_template = dest + "%s/func/sub-%s_ses-02_task-rest_%s_native.nii.gz"
-rest_mni_template = dest + "%s/func/sub-%s_ses-02_task-rest_%s_MNI2mm.nii.gz"
-noise_template = dest + "%s/func/sub-%s_ses-02_task-rest_%s_confounds.txt"
-qc_template = dest + "%s/func/sub-%s_ses-02_task-rest_%s_QC.pdf"
-brain_mask_template = dest + "%s/masks/sub-%s_ses-%s_acq-mp2rage_brainmask.nii.gz"
+rest_template = dest + "sub-%s/func/sub-%s_ses-02_task-rest_%s_native.nii.gz"
+rest_mni_template = dest + "sub-%s/func/sub-%s_ses-02_task-rest_%s_MNI2mm.nii.gz"
+noise_template = dest + "sub-%s/func/sub-%s_ses-02_task-rest_%s_confounds.txt"
+qc_template = dest + "sub-%s/func/sub-%s_ses-02_task-rest_%s_QC.pdf"
+brain_mask_template = dest + "sub-%s/masks/sub-%s_ses-%s_acq-mp2rage_brainmask.nii.gz"
 
 subjects_lsd = list(pd.read_csv('/home/raid3/huntenburg/workspace/lsd_data_paper/lsd_preproc.csv', dtype='str')['ID'])
 subjects_lsd.sort()
+#subjects_lsd = ['26500', '25019', '23700']
 
 lut = pd.read_csv('/home/raid3/huntenburg/workspace/lsd_data_paper/lookup_table.csv', dtype='str')
 
@@ -47,7 +48,7 @@ for sub_old in subjects_lsd:
         scans_old = ['rest1a', 'rest1b']
         scans_new = ['acq-AP_run-01', 'acq-PA_run-01']
     if sub_old in ['26500', '25019', '23700']:
-        scans_old = ['rest1a', 'rest1b']
+        scans_old = ['rest1a', 'rest1b', 'rest2a']
         scans_new = ['acq-AP_run-01', 'acq-PA_run-01', 'acq-AP_run-02']
 
 
@@ -66,7 +67,7 @@ for sub_old in subjects_lsd:
             
             
     ### actual copying
-    sub_folder = os.path.join(dest, sub_new)
+    sub_folder = dest %(sub_new)
     func_folder = os.path.join(sub_folder, 'func')
     masks_folder = os.path.join(sub_folder, 'masks')
     if not os.path.isdir(sub_folder):
